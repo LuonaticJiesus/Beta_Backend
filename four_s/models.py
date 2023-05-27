@@ -150,22 +150,34 @@ class Message(models.Model):
     message_id = models.AutoField(primary_key=True)
     receiver_id = models.IntegerField()
     message_type = models.IntegerField()
-    content = models.CharField(max_length=200)
     time = models.DateTimeField()
     state = models.IntegerField()  # (0:未查看, 1:已查看)
-    extern_info = models.TextField()  # 其他字段，序列化json格式
+    sender_id = models.IntegerField(null=True)
+    source_id = models.IntegerField()
+    source_content = models.CharField(max_length=200, null=True)
+    related_id = models.IntegerField()
+    related_content = models.CharField(max_length=200, null=True)
+    point = models.IntegerField(null=True)
 
     def to_dict(self):
         ret = {
             'message_id': self.message_id,
             'receiver_id': self.receiver_id,
-            'content': self.content,
+            'message_type': self.message_type,
             'state': self.state,
-            'time': self.time.strftime('%Y-%m-%d %H:%M:%S')
+            'time': self.time.strftime('%Y-%m-%d %H:%M:%S'),
+            'source_id': self.source_id,
+            'source_content': self.source_content,
+            'related_id': self.related_id,
         }
-        if self.extern_info is not None:
-            extern_info = json.loads(str(self.extern_info))
-            ret['extern_info'] = extern_info
+        if self.source_content is not None:
+            ret['source_content'] = self.source_content
+        if self.source_content is not None:
+            ret['related_content'] = self.related_content
+        if self.sender_id is not None:
+            ret['sender_id'] = self.sender_id
+        if self.point is not None:
+            ret['point'] = self.point
         return ret
 
 
