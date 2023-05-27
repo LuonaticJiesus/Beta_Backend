@@ -16,11 +16,8 @@ def message_query_rec(request):
         with transaction.atomic():
             messages_queryset = Message.objects.filter(receiver_id=user_id)
             messages = []
-            receiver_name = UserInfo.objects.get(user_id=user_id).name
             for message in messages_queryset:
                 m_dict = message.to_dict()
-                m_dict['sender_name'] = UserInfo.objects.get(user_id=message.sender_id).name
-                m_dict['receiver_name'] = receiver_name
                 messages.append(m_dict)
 
             def cmp(element):
@@ -54,7 +51,7 @@ def message_confirm(request):
             message_query_set = Message.objects.filter(message_id=message_id).filter(receiver_id=user_id)
             if not message_query_set.exists():
                 return JsonResponse({'status': -1, 'info': '消息不存在'})
-            message_query_set.update(status=confirm)
+            message_query_set.update(state=confirm)
             return JsonResponse({'status': 0, 'info': '消息状态已更新'})
     except Exception as e:
         print(e)
@@ -68,7 +65,7 @@ def message_confirm_all(request):
     try:
         user_id = int(request.META.get('HTTP_USERID'))
         with transaction.atomic():
-            Message.objects.filter(receiver_id=user_id).filter(status=0).update(status=1)
+            Message.objects.filter(receiver_id=user_id).filter(status=0).update(state=1)
             return JsonResponse({'status': 0, 'info': '所有消息状态已更新'})
     except Exception as e:
         print(e)
