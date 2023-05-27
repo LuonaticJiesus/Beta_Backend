@@ -1,6 +1,8 @@
 # python manage.py makemigrations
 # python manage.py migrate
 # python manage.py createsuperuser
+import json
+
 from django.db import models
 
 
@@ -146,25 +148,25 @@ class NoticeConfirm(models.Model):
 
 class Message(models.Model):
     message_id = models.AutoField(primary_key=True)
-    sender_id = models.IntegerField()
     receiver_id = models.IntegerField()
+    message_type = models.IntegerField()
     content = models.CharField(max_length=200)
-    source_type = models.IntegerField()  # (1: Post, 2: Comment)
-    source_id = models.IntegerField()
     time = models.DateTimeField()
-    status = models.IntegerField()  # (0:未查看, 1:已查看)
+    state = models.IntegerField()  # (0:未查看, 1:已查看)
+    extern_info = models.TextField()  # 其他字段，序列化json格式
 
     def to_dict(self):
-        return {
+        ret = {
             'message_id': self.message_id,
-            'sender_id': self.sender_id,
             'receiver_id': self.receiver_id,
             'content': self.content,
-            'source_type': self.source_type,
-            'source_id': self.source_id,
-            'status': self.status,
+            'state': self.state,
             'time': self.time.strftime('%Y-%m-%d %H:%M:%S')
         }
+        if self.extern_info is not None:
+            extern_info = json.loads(str(self.extern_info))
+            ret['extern_info'] = extern_info
+        return ret
 
 
 class Permission(models.Model):
