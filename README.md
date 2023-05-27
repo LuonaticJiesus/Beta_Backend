@@ -172,21 +172,25 @@
 
 ### Message
 
-| 属性名              | 类型 | 限制                                                         | 说明                                                         |
-| ------------------- | ---- | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| message_id          |      |                                                              |                                                              |
-| message_type        |      | 101,102,103<br />201,202,203,204,205,206,207,208,209<br />301,302,303,304,305 | 模块更改产生的消息<br />帖子相关产生的消息<br />评论相关产生的消息 |
-| sender_id           |      |                                                              | 消息产生的用户id（联表查询用户名、头像等）                   |
-| ==sender_name等==   |      |                                                              |                                                              |
-| receiver_id         |      |                                                              | 接收这条消息的用户id                                         |
-| ==receiver_name等== |      |                                                              |                                                              |
-| source_id           |      |                                                              | 根据message_type，source_id代表block_id、post_id和comment_id其一<br />意义：消息来源的id<br />用于点击跳转 |
-| ==source_content==  |      |                                                              | 根据message_type，source_content代表block_name、post_title、source_comment_content其一<br />意义：消息来源的内容 |
-| related_id          |      |                                                              | 跳转id                                                       |
-| related_content     |      |                                                              | 根据message_type，new_content代表“模块有新帖子，请查收”等、“发布帖子，消耗积分。。。“等、被评论的内容等其一 |
-| point               |      |                                                              |                                                              |
+| 属性名              | 类型          | 限制                                                         | 说明                                                         |
+| ------------------- | ------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| message_id          | AutoField     | 主键                                                         |                                                              |
+| message_type        | IntegerField  | 101,102,103<br />201,202,203,204,205,206,207,208,209<br />301,302,303,304,305 | 模块更改产生的消息<br />帖子相关产生的消息<br />评论相关产生的消息 |
+| time                | DateTimeField |                                                              | 消息产生的时间                                               |
+| state               | IntegerField  |                                                              | 消息是否被查收                                               |
+| sender_id           | IntegerField  | 可空                                                         | 消息产生的用户id（联表查询用户名、头像等）                   |
+| ==sender_name==     |               |                                                              |                                                              |
+| ==sender_avater==   |               |                                                              |                                                              |
+| receiver_id         | IntegerField  |                                                              | 接收这条消息的用户id                                         |
+| ==receiver_name==   |               |                                                              |                                                              |
+| ==receiver_avater== |               |                                                              |                                                              |
+| source_id           | IntegerField  |                                                              | 根据message_type，source_id代表block_id、post_id和comment_id其一<br />意义：消息来源的id<br />用于点击**跳转** |
+| source_content      | CharField     | max_length=200，可空                                         | 根据message_type，source_content代表block_name、post_title、source_comment_content其一<br />意义：消息来源的内容 |
+| related_id          | IntegerField  |                                                              |                                                              |
+| related_content     | CharField     | max_length=200，可空                                         | 根据message_type，new_content代表“模块有新帖子，请查收”等、“发布帖子，消耗积分。。。“等、被评论的内容等其一 |
+| point               | IntegerField  | 可空                                                         |                                                              |
 
-| 功能               | message_type | sender_id                     | ==sender_name== | source_id（跳转）           | ==source_content==                  | related_id                         | new_content                                               | point |
+| 功能               | message_type | sender_id                     | ==sender_name== | source_id（跳转）           | source_content                      | related_id                         | related_content                                           | point |
 | ------------------ | ------------ | ----------------------------- | --------------- | --------------------------- | ----------------------------------- | ---------------------------------- | --------------------------------------------------------- | ----- |
 | 模块有新帖子       | 101          | block_id                      | block_name      | block_id                    |                                     | post_id                            | ”您关注的模块有新帖发布啦！“ + post_title                 |       |
 | **模块有新通知**   | 102          | block_id                      | block_name      | block_id                    |                                     | notice_id                          | ”您关注的模块有新通知！“ + notice_content                 |       |
@@ -206,29 +210,6 @@
 | 评论被删除，扣积分 | 303          |                               | ”系统消息“      | post_id<br />评论所在的帖子 | post_title<br />评论所在的帖子title | （comment_id<br />被删除的评论id） | ”您的帖子被取消加精了，积分减少==XX==“                    |       |
 | 评论被评论         | 304          | user_id<br />发布评论的用户id | user_name       | post_id                     | commented_content<br />被评论的内容 | comment_id<br />评论的id           | ”您收到了一条评论”+comment_content                        |       |
 | 评论被评论，加积分 | 305          | user_id<br />发布评论的id     | user_name       | post_id                     | commented_content<br />被评论的内容 | comment_id<br />评论的id           | ”您收到了一条评论，积分增加==XX==”                        |       |
-
-
-
-模块有新帖子：message_type = 101，extern_info: {"block_id":123, "block_name": "模块名"}
-
-模块有新通知：message_type = 101，extern_info: {"block_id":123, "block_name": "模块名"}
-
-模块权限被改变：message_type = 102，extern_info: {"block_id":123, "block_name": "模块名"}
-模块被删除：message_type = 103，extern_info: {"block_id":123, "block_name": "模块名"}
-帖子发布扣积分：message_type = 201，extern_info: {"post_id":123, "post_title": "帖子标题", "point": -1}
-帖子被加精：message_type = 202，extern_info: {"post_id":123, "post_title": "帖子标题"}
-帖子被加精，增加积分：message_type = 203，extern_info: {"post_id":123, "post_title": "帖子标题", "point": 10}
-帖子被取消加精：message_type = 204，extern_info: {"post_id":123, "post_title": "帖子标题"}
-帖子被取消加精，减积分：message_type = 205，extern_info: {"post_id":123, "post_title": "帖子标题", "point": -5}
-帖子被删除：message_type = 206，extern_info: {"post_id":123, "post_title": "帖子标题"}
-帖子被删除，减积分：message_type = 207，extern_info: {"post_id":123, "post_title": "帖子标题", "point": -10}
-帖子被评论：message_type = 208, extern_info: {"post_id":123, "post_title": "帖子标题", "recv_comment_id": 456, "recv_comment_txt": "评论内容"}
-帖子被评论加积分：message_type = 209, extern_info: {"post_id":123, "post_title": "帖子标题", "recv_comment_id": 456, "recv_comment_txt": "评论内容", "point": 1}
-评论发布扣积分：message_type = 301，extern_info: {"comment_id":123, "comment_txt": "评论内容", "point": -1}
-评论被删除：message_type = 302，extern_info: {"comment_id":123, "comment_txt": "评论内容"}
-评论被删除，扣积分：message_type = 303，extern_info: {"comment_id":123, "comment_txt": "评论内容", "point": -1}
-评论被评论：message_type = 304，extern_info: {"comment_id":123, "comment_txt": "本人评论内容", "recv_comment_id": 456, "recv_comment_txt": "别人评论内容"}
-评论被评论，加积分：message_type = 305，extern_info: {"comment_id":123, "comment_txt": "本人评论内容", "recv_comment_id": 456, "recv_comment_txt": "别人评论内容", ""}
 
 
 
