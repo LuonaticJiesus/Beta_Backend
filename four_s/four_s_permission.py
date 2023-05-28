@@ -1,10 +1,11 @@
 import json
+from datetime import datetime
 
 from django.db import transaction
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
-from four_s.models import Permission, UserInfo, Block
+from four_s.models import Permission, UserInfo, Block, Message
 
 
 @csrf_exempt
@@ -104,6 +105,17 @@ def permission_set(request):
             if user_perm < target_perm:
                 return JsonResponse({'status': -1, 'info': '权限不足'})
             Permission.objects.filter(user_id=user_id).filter(block_id=block_id).update(permission=permission)
+            # send messages
+            message_type = 103
+            state = 0  # 未查看
+            message = Message(message_type=message_type,
+                              time=datetime.now(),
+                              state=state,
+                              receiver_id=user_id,
+                              source_id=block_id,
+                              source_content=Block.objects.get(block_id=block_id).name,
+                              related_id=block_id)
+            message.save()
             return JsonResponse({'status': 0, 'info': '设置成功'})
     except Exception as e:
         print(e)
