@@ -5,7 +5,7 @@ from django.db import transaction
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
-from four_s.models import Block, Permission, Post, UserInfo, PostLike, Comment, PostChosen, PostFavor
+from four_s.models import Block, Permission, Post, UserInfo, PostLike, Comment, PostChosen, PostFavor, Message
 
 
 def wrap_post(p, user_id):
@@ -238,6 +238,25 @@ def post_publish(request):
                 return JsonResponse({'status': -1, 'info': '权限不足'})
             post = Post(title=title, user_id=user_id, txt=txt, block_id=block_id, time=datetime.now())
             post.save()
+            # send messages
+            perm_query_set = Permission.objects.filter(block_id=block_id)
+            message_type = 101
+            state = 0  # 未查看
+            for perm_entry in perm_query_set:
+                receiver_id = perm_entry.user_id
+                source_id = block_id
+                # source_content = Block.objects.get(block_id=block_id).name
+                related_id = post.post_id
+                related_content = post.title
+                message = Message(message_type=message_type,
+                                  time=datetime.now(),
+                                  state=state,
+                                  sender_id=block_id,
+                                  receiver_id=receiver_id,
+                                  source_id=source_id,
+                                  related_id=related_id,
+                                  related_content=related_content)
+                message.save()
             return JsonResponse({'status': 0, 'info': '已发布', 'data': {'post_id': post.post_id}})
     except Exception as e:
         print(e)

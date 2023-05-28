@@ -194,7 +194,7 @@
 
 
 
-| 功能                     | message_type | sender_id                     | ==sender_name== | source_id（跳转）           | ==source_content==                  | related_id                         | related_content | 消息的内容（供参考）                                         |
+| 功能                     | message_type | sender_id                     | ==sender_name== | source_id（跳转）           | source_content                      | related_id                         | related_content | 消息的内容（供参考）                                         |
 | ------------------------ | ------------ | ----------------------------- | --------------- | --------------------------- | ----------------------------------- | ---------------------------------- | --------------- | ------------------------------------------------------------ |
 | 模块有新帖子             | 101          | block_id                      | block_name      | block_id                    |                                     | post_id                            | post_title      | ”您关注的模块” + **sender_name** + “有新帖发布啦！“ + **related_content** |
 | **模块有新通知**         | 102          | block_id                      | block_name      | block_id                    |                                     | notice_id                          | notice_title    | ”您关注的模块”+**sender_name**+“有新通知！“ + **related_content** |
