@@ -6,7 +6,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
 from four_s.models import Block, Permission, Post, UserInfo, PostLike, Comment, PostChosen, PostFavor, Message
-
+from BackEnd import global_config
 
 def wrap_post(p, user_id):
     p_dict = p.to_dict()
@@ -238,7 +238,19 @@ def post_publish(request):
                 return JsonResponse({'status': -1, 'info': '权限不足'})
             post = Post(title=title, user_id=user_id, txt=txt, block_id=block_id, time=datetime.now())
             post.save()
-            # send messages
+            
+            # message & point for publisher
+            cost_point = -int(global_config['point']['post']['publish'])
+            user = UserInfo.objects.filter(user_id=user_id)
+            if cost_point > user[0].point:
+                return JsonResponse({'status': -1, 'info': '积分不足'})
+            user.update(point=user[0].point - cost_point)
+            message = Message(receiver_id=user_id, message_type=201, time=datetime.now(), state=0, sender_id=None,
+                              source_id=post.post_id, source_content=post.title, related_id=post.post_id,
+                              related_content=None, point=-cost_point)
+            message.save()
+            
+            # messages for blocks
             perm_query_set = Permission.objects.filter(block_id=block_id)
             message_type = 101
             state = 0  # 未查看
@@ -294,6 +306,21 @@ def post_delete(request):
             PostFavor.objects.filter(post_id=post_id).delete()
             PostLike.objects.filter(post_id=post_id).delete()
             Post.objects.filter(post_id=post_id).delete()
+            # message & point
+            if user_id != post.user_id:
+                user = UserInfo.objects.filter(user_id=post.user_id)
+                point_cost = -int(global_config['point']['post']['deleted'])
+                point_sub = min(point_cost, user[0].point)
+                message1 = Message(receiver_id=post.user_id, message_type=205, time=datetime.now(), state=0,
+                                   sender_id=None, source_id=post_id, source_content=post.title, related_id=post_id,
+                                   related_content=None, point=None)
+                message2 = Message(receiver_id=post.user_id, message_type=206, time=datetime.now(), state=0,
+                                   sender_id=None, source_id=post_id, source_content=post.title, related_id=post_id,
+                                   related_content=None, point=-point_sub)
+                new_point = user[0].point - point_sub
+                user.update(point=new_point)
+                message1.save()
+                message2.save()
             return JsonResponse({'status': 0, 'info': '已删除'})
     except Exception as e:
         print(e)
@@ -355,12 +382,39 @@ def post_choose(request):
                     permission__gte=2).exists():
                 return JsonResponse({'status': -1, 'info': '权限错误'})
             now_chosen = PostChosen.objects.filter(block_id=block_id).filter(post_id=post_id)
+            post = Post.objects.get(post_id=post_id)
+            user = UserInfo.objects.filter(user_id=post.user_id)
             if now_chosen.exists():
                 now_chosen.delete()
+                # message & point
+                point_cost = -int(global_config['point']['post']['undo_chosen'])
+                point_sub = min(user[0].point, point_cost)
+                message1 = Message(receiver_id=post.user_id, message_type=204, time=datetime.now(), state=0,
+                                   sender_id=None, source_id=post_id, source_content=post.title, related_id=post_id,
+                                   related_content=None, point=None)
+                message2 = Message(receiver_id=post.user_id, message_type=209, time=datetime.now(), state=0,
+                                   sender_id=None, source_id=post_id, source_content=post.title, related_id=post_id,
+                                   related_content=None, point=-point_sub)
+                new_point = user[0].point - point_sub
+                user.update(point=new_point)
+                message1.save()
+                message2.save()
                 return JsonResponse({'status': 0, 'info': '已取消加精'})
             else:
                 new_chosen = PostChosen(block_id=block_id, post_id=post_id)
                 new_chosen.save()
+                # message & point
+                point_add = int(global_config['point']['post']['chosen'])
+                message1 = Message(receiver_id=post.user_id, message_type=202, time=datetime.now(), state=0,
+                                   sender_id=None, source_id=post_id, source_content=post.title, related_id=post_id,
+                                   related_content=None, point=None)
+                message2 = Message(receiver_id=post.user_id, message_type=203, time=datetime.now(), state=0,
+                                   sender_id=None, source_id=post_id, source_content=post.title, related_id=post_id,
+                                   related_content=None, point=point_add)
+                new_point = user[0].point + point_add
+                user.update(point=new_point)
+                message1.save()
+                message2.save()
                 return JsonResponse({'status': 0, 'info': '帖子已加精'})
     except Exception as e:
         print(e)
