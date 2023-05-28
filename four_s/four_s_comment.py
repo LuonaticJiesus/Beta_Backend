@@ -6,7 +6,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
 from four_s.models import Post, Permission, Comment, CommentLike, UserInfo, Message
-
+from BackEnd import global_config
 
 def wrap_comment(comm_dict: dict, user_id):
     comm_id = comm_dict['comment_id']
@@ -120,8 +120,48 @@ def comment_publish(request):
                               parent_id=parent_id, root_comment_id=root_comment_id, reply_user_id=reply_user_id,
                               txt=txt, time=datetime.now())
             comment.save()
-            # send a message
-
+            # send message 发布评论扣积分
+            message_type = 301
+            state = 0  # 未查看
+            point_cost = -int(global_config['point']['comment']['publish'])
+            message = Message(message_type=message_type,
+                              time=datetime.now(),
+                              state=state,
+                              receiver_id=user_id,
+                              source_id=post_id,
+                              source_content=post.title,
+                              related_id=comment.comment_id,
+                              point=point_cost)
+            message.save()
+            # send message 被评论
+            if parent_id is not None:
+                parent_comment = Comment.objects.get(comment_id=parent_id)
+                message_type = 304
+                source_content = parent_comment.txt
+                message = Message(message_type=message_type,
+                                  time=datetime.now(),
+                                  state=state,
+                                  sender_id=user_id,
+                                  receiver_id=parent_comment.user_id,
+                                  source_id=post_id,
+                                  source_content=source_content,
+                                  related_id=comment.comment_id,
+                                  related_content=comment.txt)
+                message.save()
+                # send message 被评论加积分
+                message_type = 305
+                source_content = parent_comment.txt
+                point_cost = int(global_config['point']['comment']['commented'])
+                message = Message(message_type=message_type,
+                                  time=datetime.now(),
+                                  state=state,
+                                  sender_id=user_id,
+                                  receiver_id=parent_comment.user_id,
+                                  source_id=post_id,
+                                  source_content=source_content,
+                                  related_id=comment.comment_id,
+                                  point=point_cost)
+                message.save()
             return JsonResponse({'status': 0, 'info': '已发布'})
     except Exception as e:
         print(e)
@@ -153,6 +193,36 @@ def comment_delete(request):
             user_permission = user_permission_query_set[0].permission
             if user_permission < 2 and user_id != comment.user_id:
                 return JsonResponse({'status': -1, 'info': '权限不足'})
+            if user_id != comment.user_id:
+                # send message
+                message_type = 302
+                state = 0  # 未查看
+
+                source_id = comment.post_id
+                source_content = Post.objects.get(post_id=source_id).title
+                related_content = comment.txt
+                # 被删除
+                message = Message(message_type=message_type,
+                                  time=datetime.now(),
+                                  state=state,
+                                  receiver_id=user_id,
+                                  source_id=source_id,
+                                  source_content=source_content,
+                                  related_id=comment.comment_id,  # 后续不可用
+                                  related_content=related_content)
+                message.save()
+                # 扣积分
+                message_type = 303
+                point_cost = -int(global_config['point']['comment']['deleted'])
+                message = Message(message_type=message_type,
+                                  time=datetime.now(),
+                                  state=state,
+                                  receiver_id=user_id,
+                                  source_id=source_id,
+                                  source_content=source_content,
+                                  related_id=comment.comment_id,    # 后续不可用
+                                  point=point_cost)
+                message.save()
             # delete
             if comment.parent_id is None:
                 Comment.objects.filter(root_comment_id=comment.comment_id).delete()
