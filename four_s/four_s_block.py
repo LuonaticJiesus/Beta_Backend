@@ -1,3 +1,4 @@
+import datetime
 import json
 import random
 
@@ -7,7 +8,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
 from four_s.models import Block, Permission, Post, Comment, CommentLike, PostFavor, PostChosen, PostLike, Notice, \
-    Contribution
+    Contribution, Message
 
 
 def check_name(name: str):
@@ -331,6 +332,24 @@ def block_delete(request):
                 PostChosen.objects.filter(post_id=post_id).delete()
                 PostLike.objects.filter(post_id=post_id).delete()
                 Post.objects.filter(post_id=post_id).delete()
+            # send messages
+            perm_query_set = Permission.objects.filter(block_id=block_id)
+            message_type = 104
+            state = 0   # 未查看
+            for perm_entry in perm_query_set:
+                receiver_id = perm_entry.user_id
+                source_id = block_id
+                source_content = block[0].name
+                related_id = block_id
+                message = Message(message_type=message_type,
+                                  time=datetime.datetime.now(),
+                                  state=state,
+                                  sender_id=block_id,
+                                  receiver_id=receiver_id,
+                                  source_id=source_id,
+                                  source_content=source_content,
+                                  related_id=related_id)
+                message.save()
             # del block
             Permission.objects.filter(block_id=block_id).delete()
             Notice.objects.filter(block_id=block_id).delete()
