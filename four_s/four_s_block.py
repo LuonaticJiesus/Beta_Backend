@@ -344,7 +344,6 @@ def block_delete(request):
                 message = Message(message_type=message_type,
                                   time=datetime.datetime.now(),
                                   state=state,
-                                  sender_id=block_id,
                                   receiver_id=receiver_id,
                                   source_id=source_id,
                                   source_content=source_content,
