@@ -5,7 +5,7 @@ from django.db import transaction
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
-from four_s.models import Notice, UserInfo, Block, NoticeConfirm, Permission
+from four_s.models import Notice, UserInfo, Block, NoticeConfirm, Permission, Message
 
 
 def check_title(title: str):
@@ -197,6 +197,26 @@ def notice_publish(request):
                             time=datetime.now(),  # publish_time
                             ddl=datetime.strptime(ddl, '%Y-%m-%d %H:%M:%S'))
             notice.save()
+            # send messages
+            perm_query_set = Permission.objects.filter(block_id=block_id)
+            message_type = 102
+            state = 0  # 未查看
+            for perm_entry in perm_query_set:
+                receiver_id = perm_entry.user_id
+                source_id = block_id
+                source_content = Block.objects.get(block_id=block_id).name
+                related_id = notice.notice_id
+                related_content = notice.title
+                message = Message(message_type=message_type,
+                                  time=datetime.now(),
+                                  state=state,
+                                  sender_id=block_id,
+                                  receiver_id=receiver_id,
+                                  source_id=source_id,
+                                  # source_content=source_content,
+                                  related_id=related_id,
+                                  related_content=related_content)
+                message.save()
             return JsonResponse({'status': 0, 'info': '已发布', 'data': {'notice_id': notice.notice_id}})
     except Exception as e:
         print(e)
