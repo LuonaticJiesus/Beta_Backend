@@ -162,6 +162,20 @@ def comment_publish(request):
                                   related_id=comment.comment_id,
                                   point=point_cost)
                 message.save()
+            # message for post
+            if parent_id is None:
+                post = post.objects.get(post_id=post_id)
+                user = UserInfo.objects.filter(user_id=post.user_id)
+                point_add = int(global_config['point']['post']['commented'])
+                message1 = Message(message_type=207, time=datetime.now(), state=0, sender_id=user_id,
+                                   receiver_id=post.user_id, source_id=post_id, source_content=post.title,
+                                   related_id=comment.comment_id, related_content=comment.txt)
+                message2 = Message(message_type=208, time=datetime.now(), state=0, sender_id=None,
+                                   receiver_id=post.user_id, source_id=post_id, source_content=post.title,
+                                   related_id=comment.comment_id, related_content=comment.txt, point=point_add)
+                user.update(point=user[0].point + point_add)
+                message1.save()
+                message2.save()
             return JsonResponse({'status': 0, 'info': '已发布'})
     except Exception as e:
         print(e)
