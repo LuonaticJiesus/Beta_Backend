@@ -354,6 +354,7 @@ def post_like(request):
             else:
                 new_like = PostLike(post_id=post_id, user_id=user_id)
                 new_like.save()
+                # message & point
                 return JsonResponse({'status': 0, 'info': '点赞成功'})
     except Exception as e:
         print(e)

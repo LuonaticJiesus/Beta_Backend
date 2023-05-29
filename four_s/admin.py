@@ -4,6 +4,7 @@ from four_s.models import *
 
 # Register your models here.
 admin.site.register(UserInfo)
+admin.site.register(UserLogin)
 admin.site.register(Post)
 admin.site.register(PostLike)
 admin.site.register(PostFavor)
