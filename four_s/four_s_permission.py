@@ -114,7 +114,8 @@ def permission_set(request):
                               receiver_id=user_id,
                               source_id=block_id,
                               source_content=Block.objects.get(block_id=block_id).name,
-                              related_id=block_id)
+                              related_id=block_id,
+                              related_content=str(permission))
             message.save()
             return JsonResponse({'status': 0, 'info': '设置成功'})
     except Exception as e:
