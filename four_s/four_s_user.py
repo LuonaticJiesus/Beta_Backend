@@ -10,8 +10,9 @@ from django.db import transaction
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 
+from BackEnd import global_config
 from BackEnd.settings import EMAIL_HOST_USER, SERVER_IP, SERVER_PORT, TIME_ZONE
-from four_s.models import UserInfo, EmailPro
+from four_s.models import UserInfo, EmailPro, UserLogin, Message
 from utils.auth_util import create_token
 
 
@@ -180,6 +181,24 @@ def user_login(request):
                 return JsonResponse({'status': -1, 'info': '密码错误'})
             user_token = create_token(str(user.user_id))
             user_id = user.user_id
+            # message & point
+            login = UserLogin.objects.filter(user_id=user_id)
+            point_add = int(global_config['point']['user']['login'])
+            now_time = datetime.datetime.now()
+            zero_time_str = now_time.strftime('%Y-%m-%d %H:%M:%S')[:len('2000:01-01 ')] + '00:00:00'
+            zero_time = datetime.datetime.strptime(zero_time_str, '%Y-%m-%d %H:%M:%S')
+            message = Message(receiver_id=user_id, message_type=401, time=now_time, state=0,
+                              source_id=user_id, related_id=user_id, point=point_add)
+            user_query_set = UserInfo.objects.filter(user_id=user_id)
+            if not login.exists():
+                new_login = UserLogin(user_id=user_id, time=now_time)
+                new_login.save()
+                message.save()
+                user_query_set.update(point=user_query_set[0].point + point_add)
+            elif login[0].time < zero_time:
+                login.update(time=now_time)
+                message.save()
+                user_query_set.update(point=user_query_set[0].point + point_add)
             return JsonResponse({'status': 0, 'info': '已登录', 'data': {
                 'userid': user_id,
                 'token': user_token

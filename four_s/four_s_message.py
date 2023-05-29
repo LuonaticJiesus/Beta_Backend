@@ -4,7 +4,19 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.db import transaction
 
-from four_s.models import Message, UserInfo
+from four_s.models import Message, UserInfo, Block
+
+
+def wrap_message(message):
+    m_dict = message.to_dict()
+    m_dict['receiver_name'] = UserInfo.objects.get(user_id=message.receiver_id).name
+    if message.message_type in [101, 102]:
+        m_dict['sender_name'] = Block.objects.get(block_id=message.sender_id).name
+    elif message.message_type in [207, 304, 305]:
+        m_dict['sender_name'] = UserInfo.objects.get(user_id=message.sender_id).name
+    else:
+        m_dict['sender_name'] = '系统消息'
+    return m_dict
 
 
 @csrf_exempt
@@ -17,7 +29,7 @@ def message_query_rec(request):
             messages_queryset = Message.objects.filter(receiver_id=user_id)
             messages = []
             for message in messages_queryset:
-                m_dict = message.to_dict()
+                m_dict = wrap_message(message)
                 messages.append(m_dict)
 
             def cmp(element):

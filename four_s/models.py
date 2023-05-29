@@ -33,6 +33,11 @@ class UserInfo(models.Model):
         return ret
 
 
+class UserLogin(models.Model):
+    user_id = models.IntegerField()
+    time = models.DateTimeField()
+
+
 class Post(models.Model):
     post_id = models.AutoField(primary_key=True)
     title = models.CharField(max_length=200)
@@ -48,7 +53,7 @@ class Post(models.Model):
             'user_id': self.user_id,
             'txt': self.txt,
             'block_id': self.block_id,
-            'time': self.time
+            'time': self.time.strftime('%Y-%m-%d %H:%M:%S'),
         }
 
 
@@ -172,7 +177,7 @@ class Message(models.Model):
         }
         if self.source_content is not None:
             ret['source_content'] = self.source_content
-        if self.source_content is not None:
+        if self.related_content is not None:
             ret['related_content'] = self.related_content
         if self.sender_id is not None:
             ret['sender_id'] = self.sender_id
