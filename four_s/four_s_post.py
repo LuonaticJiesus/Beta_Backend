@@ -461,25 +461,16 @@ def post_query_favor(request):
         return JsonResponse({'status': -1, 'info': '请求方式错误'})
     try:
         user_id = int(request.META.get('HTTP_USERID'))
-        block_id = request.GET.get('block_id')
-        # check params
-        if block_id is None:
-            return JsonResponse({'status': -1, 'info': '缺少参数'})
-        block_id = int(block_id)
         # db
         with transaction.atomic():
-            if not Block.objects.filter(block_id=block_id).exists():
-                return JsonResponse({'status': -1, 'info': '模块不存在'})
             favor_post_ids = set()
             favor_query_set = PostFavor.objects.filter(user_id=user_id)
             for f in favor_query_set:
                 favor_post_ids.add(f.post_id)
-            post_query_set = Post.objects.filter(block_id=block_id).order_by('-time')
             posts = []
-            for post in post_query_set:
-                if post.post_id in favor_post_ids:
-                    p_dict = wrap_post(post, user_id)
-                    posts.append(p_dict)
+            for pid in favor_post_ids:
+                post = Post.objects.get(post_id=pid)
+                posts.append(wrap_post(post, user_id))
             return JsonResponse({'status': 0, 'info': '查询成功', 'data': posts})
     except Exception as e:
         print(e)
