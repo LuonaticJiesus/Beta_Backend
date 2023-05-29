@@ -34,7 +34,7 @@ class UserInfo(models.Model):
 
 
 class UserLogin(models.Model):
-    user_id = models.IntegerField()
+    user_id = models.IntegerField(primary_key=True)
     time = models.DateTimeField()
 
 

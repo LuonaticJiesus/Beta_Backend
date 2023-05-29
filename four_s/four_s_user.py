@@ -205,7 +205,7 @@ def user_login(request):
             }})
     except Exception as e:
         print(e)
-        return JsonResponse({'status': -1, 'info': '操作错误，注册失败'})
+        return JsonResponse({'status': -1, 'info': '操作错误，登录失败'})
 
 
 @csrf_exempt
