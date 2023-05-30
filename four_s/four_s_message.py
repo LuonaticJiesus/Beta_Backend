@@ -49,21 +49,21 @@ def message_confirm(request):
     try:
         user_id = int(request.META.get('HTTP_USERID'))
         data = json.loads(request.body)
-        message_id = data.get('message_id')
-        confirm = data.get('confirm')
+        message_ids = data.get('message_ids')
         # check params
-        if message_id is None or confirm is None:
+        if message_ids is None:
             return JsonResponse({'status': -1, 'info': '缺少参数'})
-        message_id = int(message_id)
-        confirm = int(confirm)
-        if confirm not in [0, 1]:
-            return JsonResponse({'status': -1, 'info': '参数错误'})
+        msg_ids = []
+        for m_id in message_ids:
+            msg_ids.append(int(m_id['message_id']))
         # db
         with transaction.atomic():
-            message_query_set = Message.objects.filter(message_id=message_id).filter(receiver_id=user_id)
-            if not message_query_set.exists():
-                return JsonResponse({'status': -1, 'info': '消息不存在'})
-            message_query_set.update(state=confirm)
+            for m_id in msg_ids:
+                msg_query_set = Message.objects.filter(message_id=m_id).filter(receiver_id=user_id)
+                if not msg_query_set.exists():
+                    return JsonResponse({'status': -1, 'info': '消息不存在'})
+                new_state = 1 if msg_query_set[0].state == 0 else 0
+                msg_query_set.update(state=new_state)
             return JsonResponse({'status': 0, 'info': '消息状态已更新'})
     except Exception as e:
         print(e)

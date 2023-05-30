@@ -265,12 +265,21 @@ def comment_like(request):
             if not comment_query_set.exists():
                 return JsonResponse({'status': -1, 'info': '约束错误'})
             now_like = CommentLike.objects.filter(comment_id=comment_id).filter(user_id=user_id)
+            comment = comment_query_set[0]
+            target_user = UserInfo.objects.filter(user_id=comment.user_id)
+            point_like = int(global_config['point']['comment']['liked'])
             if now_like.exists():
                 now_like.delete()
+                # point
+                new_point = max(0, target_user[0].point - point_like)
+                target_user.update(point=new_point)
                 return JsonResponse({'status': 0, 'info': '已取消点赞'})
             else:
                 new_like = CommentLike(user_id=user_id, comment_id=comment_id)
                 new_like.save()
+                # point
+                new_point = max(0, target_user[0].point + point_like)
+                target_user.update(point=new_point)
                 return JsonResponse({'status': 0, 'info': '点赞成功'})
     except Exception as e:
         print(e)
