@@ -278,6 +278,42 @@ def post_publish(request):
         return JsonResponse({'status': -1, 'info': '操作错误，发布失败'})
 
 
+def post_modify(request):
+    if request.method != 'POST':
+        return JsonResponse({'status': -1, 'info': '请求方式错误'})
+    try:
+        user_id = int(request.META.get('HTTP_USERID'))
+        data = json.loads(request.body)
+        post_id = data.get('post_id')
+        title = data.get('title')
+        txt = data.get('txt')
+        # check params
+        if post_id is None:
+            return JsonResponse({'status': -1, 'info': '缺少参数'})
+        post_id = int(post_id)
+        if title is not None:
+            title = str(title).strip('\t').strip(' ')
+            if not check_title(title):
+                return JsonResponse({'status': -1, 'info': '标题格式错误'})
+        if txt is not None:
+            txt = str(txt).strip('\t').strip(' ')
+            if not check_txt(txt):
+                return JsonResponse({'status': -1, 'info': '内容格式错误'})
+        # db
+        with transaction.atomic():
+            post_query_set = Post.objects.filter(post_id=post_id).filter(user_id=user_id)
+            if not post_query_set.exists():
+                return JsonResponse({'status': -1, 'info': '帖子不存在'})
+            if title is not None:
+                post_query_set.update(title=title)
+            if txt is not None:
+                post_query_set.update(txt=txt)
+            return JsonResponse({'status': 0, 'info': '已修改'})
+    except Exception as e:
+        print(e)
+        return JsonResponse({'status': -1, 'info': '操作错误，修改失败'})
+
+
 @csrf_exempt
 def post_delete(request):
     if request.method != 'POST':
