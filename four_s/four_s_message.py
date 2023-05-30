@@ -50,6 +50,7 @@ def message_confirm(request):
         user_id = int(request.META.get('HTTP_USERID'))
         data = json.loads(request.body)
         message_ids = data.get('message_ids')
+        state = data.get('state')
         # check params
         if message_ids is None:
             return JsonResponse({'status': -1, 'info': '缺少参数'})
@@ -62,8 +63,7 @@ def message_confirm(request):
                 msg_query_set = Message.objects.filter(message_id=m_id).filter(receiver_id=user_id)
                 if not msg_query_set.exists():
                     return JsonResponse({'status': -1, 'info': '消息不存在'})
-                new_state = 1 if msg_query_set[0].state == 0 else 0
-                msg_query_set.update(state=new_state)
+                msg_query_set.update(state=state)
             return JsonResponse({'status': 0, 'info': '消息状态已更新'})
     except Exception as e:
         print(e)
