@@ -52,8 +52,11 @@ def message_confirm(request):
         message_ids = data.get('message_ids')
         state = data.get('state')
         # check params
-        if message_ids is None:
+        if message_ids is None or state is None:
             return JsonResponse({'status': -1, 'info': '缺少参数'})
+        state = int(state)
+        if state not in [0, 1]:
+            return JsonResponse({'status': -1, 'info': '状态码错误'})
         msg_ids = []
         for m_id in message_ids:
             msg_ids.append(int(m_id['message_id']))
