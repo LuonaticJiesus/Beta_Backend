@@ -278,6 +278,7 @@ def post_publish(request):
         return JsonResponse({'status': -1, 'info': '操作错误，发布失败'})
 
 
+@csrf_exempt
 def post_modify(request):
     if request.method != 'POST':
         return JsonResponse({'status': -1, 'info': '请求方式错误'})
