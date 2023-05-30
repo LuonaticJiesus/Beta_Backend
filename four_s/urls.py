@@ -43,6 +43,7 @@ urlpatterns = [
     path('post/queryChosen/', post_query_chosen, name='post_query_chosen'),
     path('post/detail/', post_detail, name='post_detail'),
     path('post/publish/', post_publish, name='post_publish'),
+    path('post/modify/', post_modify, name='post_modify'),
     path('post/delete/', post_delete, name='post_delete'),
     path('post/like/', post_like, name='post_like'),
     path('post/choose/', post_choose, name='post_choose'),
