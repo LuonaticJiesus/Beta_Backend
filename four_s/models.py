@@ -172,7 +172,6 @@ class Message(models.Model):
             'state': self.state,
             'time': self.time.strftime('%Y-%m-%d %H:%M:%S'),
             'source_id': self.source_id,
-            'source_content': self.source_content,
             'related_id': self.related_id,
         }
         if self.source_content is not None:
