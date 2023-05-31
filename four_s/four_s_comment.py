@@ -164,7 +164,7 @@ def comment_publish(request):
                 message.save()
             # message for post
             if parent_id is None:
-                post = post.objects.get(post_id=post_id)
+                post = Post.objects.get(post_id=post_id)
                 user = UserInfo.objects.filter(user_id=post.user_id)
                 point_add = int(global_config['point']['post']['commented'])
                 message1 = Message(message_type=207, time=datetime.now(), state=0, sender_id=user_id,
