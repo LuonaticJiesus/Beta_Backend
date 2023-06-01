@@ -219,7 +219,7 @@ def comment_delete(request):
                 message = Message(message_type=message_type,
                                   time=datetime.now(),
                                   state=state,
-                                  receiver_id=user_id,
+                                  receiver_id=comment.user_id,
                                   source_id=source_id,
                                   source_content=source_content,
                                   related_id=comment.comment_id,  # 后续不可用
@@ -231,7 +231,7 @@ def comment_delete(request):
                 message = Message(message_type=message_type,
                                   time=datetime.now(),
                                   state=state,
-                                  receiver_id=user_id,
+                                  receiver_id=comment.user_id,
                                   source_id=source_id,
                                   source_content=source_content,
                                   related_id=comment.comment_id,    # 后续不可用
