@@ -11,7 +11,11 @@ def wrap_message(message):
     m_dict = message.to_dict()
     m_dict['receiver_name'] = UserInfo.objects.get(user_id=message.receiver_id).name
     if message.message_type in [101, 102]:
-        m_dict['sender_name'] = Block.objects.get(block_id=message.sender_id).name
+        block_query_set = Block.objects.filter(block_id=message.sender_id)
+        if not block_query_set.exists():
+            m_dict['sender_name'] = '不存在的模块'
+        else:
+            m_dict['sender_name'] = block_query_set[0].name
     elif message.message_type in [207, 304, 305]:
         m_dict['sender_name'] = UserInfo.objects.get(user_id=message.sender_id).name
     else:
