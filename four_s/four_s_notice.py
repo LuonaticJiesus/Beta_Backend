@@ -195,9 +195,13 @@ def notice_publish(request):
             if not Permission.objects.filter(user_id=user_id).filter(block_id=block_id).filter(
                     permission__gte=2).exists():
                 return JsonResponse({'status': -1, 'info': '缺少权限'})
+            ddl_time = datetime.strptime(ddl, '%Y-%m-%d %H:%M:%S')
+            now_time = datetime.now()
+            if ddl_time <= now_time:
+                return JsonResponse({'status': -1, 'info': '截止时间错误'})
             notice = Notice(title=title, txt=txt, user_id=user_id, block_id=block_id,
-                            time=datetime.now(),  # publish_time
-                            ddl=datetime.strptime(ddl, '%Y-%m-%d %H:%M:%S'))
+                            time=now_time,  # publish_time
+                            ddl=ddl_time)
             notice.save()
             # send messages
             perm_query_set = Permission.objects.filter(block_id=block_id)
