@@ -124,6 +124,10 @@ def comment_publish(request):
             message_type = 301
             state = 0  # 未查看
             point_cost = -int(global_config['point']['comment']['publish'])
+            if point_cost > UserInfo.objects.get(user_id=user_id).point:
+                return JsonResponse({'status': -1, 'info': '积分不足'})
+            user = UserInfo.objects.filter(user_id=user_id)
+            user.update(point=user[0].point-point_cost)
             message = Message(message_type=message_type,
                               time=datetime.now(),
                               state=state,
@@ -152,6 +156,8 @@ def comment_publish(request):
                 message_type = 305
                 source_content = parent_comment.txt
                 point_cost = int(global_config['point']['comment']['commented'])
+                user = UserInfo.objects.filter(user_id=parent_comment.user_id)
+                user.update(point=user[0].point + point_cost)
                 message = Message(message_type=message_type,
                                   time=datetime.now(),
                                   state=state,
@@ -228,6 +234,9 @@ def comment_delete(request):
                 # 扣积分
                 message_type = 303
                 point_cost = -int(global_config['point']['comment']['deleted'])
+                user = UserInfo.objects.filter(user_id=comment.user_id)
+                point_ = max(0, user[0].point - point_cost)
+                user.update(point=point_)
                 message = Message(message_type=message_type,
                                   time=datetime.now(),
                                   state=state,
