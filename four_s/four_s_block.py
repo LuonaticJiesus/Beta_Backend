@@ -1,4 +1,5 @@
 import datetime
+import functools
 import json
 import random
 
@@ -41,7 +42,7 @@ def block_query_all(request):
     try:
         # db
         with transaction.atomic():
-            block_set = Block.objects.all()
+            block_set = Block.objects.all().order_by('-time')
             blocks = []
             for block in block_set:
                 b_dict = block.to_dict()
@@ -137,6 +138,7 @@ def block_search_all(request):
             for block in block_query_set:
                 b_dict = block.to_dict()
                 blocks.append(wrap_block(b_dict))
+
             return JsonResponse({'status': 0, 'info': '查询成功', 'data': blocks})
     except Exception as e:
         print(e)
