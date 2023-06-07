@@ -213,6 +213,22 @@ class EmailPro(models.Model):
 
 
 class File(models.Model):
+    file_id = models.AutoField(primary_key=True)
+    url = models.TextField()
+    name = models.TextField(null=True)
+
+    def to_dict(self):
+        ret = {
+            'file_id': self.file_id,
+            'url': self.url
+        }
+        if self.name is not None:
+            ret['name'] = self.name
+        return ret
+
+
+class FileConn(models.Model):
+    file_conn_id = models.AutoField(primary_key=True)
+    file_id = models.IntegerField()
     obj_id = models.IntegerField()
     obj_type = models.IntegerField()
-    obj_url = models.TextField()
