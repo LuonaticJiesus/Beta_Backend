@@ -5,7 +5,7 @@ from django.db import transaction
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
-from four_s.models import Notice, UserInfo, Block, NoticeConfirm, Permission, Message
+from four_s.models import Notice, UserInfo, Block, NoticeConfirm, Permission, Message, File
 
 
 def check_title(title: str):
@@ -287,6 +287,8 @@ def notice_delete(request):
             # delete
             NoticeConfirm.objects.filter(notice_id=notice_id).delete()
             notice.delete()
+            # file
+            File.objects.filter(obj_type=2).filter(obj_id=notice_id).delete()
             return JsonResponse({'status': 0, 'info': '已删除'})
     except Exception as e:
         print(e)
