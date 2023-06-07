@@ -191,3 +191,6 @@ EMAIL_HOST_USER = global_config['email']['host_user']
 EMAIL_HOST_PASSWORD = global_config['email']['host_password']
 EMAIL_FROM = 'quad_ssss_verify'
 EMAIL_USE_TLS = True
+
+# file
+DATA_UPLOAD_MAX_MEMORY_SIZE = 20 * 1024 * 1024
