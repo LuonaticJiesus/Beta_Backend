@@ -9,7 +9,7 @@ from django.views.decorators.csrf import csrf_exempt
 from qcloud_cos import CosConfig, CosS3Client
 
 from BackEnd import global_config
-from four_s.models import Post, Notice, File, Block
+from four_s.models import Post, Notice, File, Block, FileConn
 
 tencent_cos_secret_id = global_config['tencent_cos']['secret_id']
 tencent_cos_secret_key = global_config['tencent_cos']['secret_key']
@@ -36,8 +36,11 @@ def file_upload(request):
         return JsonResponse({'status': -1, 'info': '请求方式错误'})
     try:
         file = request.FILES.get('file', None)
+        file_name = request.POST.get('name')
         if file is None:
             return JsonResponse({'status': -1, 'info': '缺少参数'})
+        if file_name is not None:
+            file_name = str(file_name)
         suffix = os.path.splitext(file.name)[-1]
         file_key = rand_str() + suffix
         response = tencent_cos_client.upload_file_from_buffer(
@@ -45,6 +48,8 @@ def file_upload(request):
         if response is None:
             return JsonResponse({'status': -1, 'info': '上传失败'})
         file_url = 'https://{}.cos.{}.myqcloud.com/{}'.format(tencent_cos_bucket, tencent_cos_region, file_key)
+        new_file = File(url=file_url, name=file_name)
+        new_file.save()
         return JsonResponse({'status': 0, 'info': '上传成功',
                              'data': {'url': file_url}})
     except Exception as e:
@@ -70,22 +75,28 @@ def file_connect(request):
             return JsonResponse({'status': -1, 'info': '类型错误'})
         obj_id = int(obj_id)
         url_list = list(url_list)
+        urls = []
+        for url in url_list:
+            urls.append(str(url))
         # db
         with transaction.atomic():
             if (obj_id == 1 and not Post.objects.filter(post_id=obj_id).exists()) \
                     or (obj_id == 2 and not Notice.objects.filter(notice_id=obj_id).exists()) \
                     or (obj_id == 3 and not Block.objects.filter(block_id=obj_id).exists()):
                 return JsonResponse({'status': -1, 'info': '类型错误'})
-            file_query_set = File.objects.filter(obj_type=obj_type).filter(obj_id=obj_id)
-            url_set = set()
-            for f in file_query_set:
-                url_set.add(f.obj_url)
-            for url in url_list:
-                url = str(url)
-                if url in url_set:
-                    continue
-                new_file = File(obj_type=obj_type, obj_id=obj_id, obj_url=url)
-                new_file.save()
+            for url in urls:
+                file_query_set = File.objects.filter(url=url)
+                if not file_query_set.exists():
+                    new_file = File(url=url)
+                    new_file.save()
+                    file_id = new_file.file_id
+                else:
+                    file_id = file_query_set[0].file_id
+                conn_query_set = FileConn.objects.filter(obj_id=obj_id)\
+                    .filter(obj_type=obj_type).filter(file_id=file_id)
+                if not conn_query_set.exists():
+                    new_conn = FileConn(file_id=file_id, obj_id=obj_id, obj_type=obj_type)
+                    new_conn.save()
             return JsonResponse({'status': 0, 'info': '已关联'})
     except Exception as e:
         print(e)
@@ -110,9 +121,12 @@ def file_list(request):
         # db
         with transaction.atomic():
             url_list = []
-            for f in File.objects.filter(obj_id=obj_id).filter(obj_type=obj_type):
-                url_list.append(f.obj_url)
-            return JsonResponse({'status': 0, 'info': '查询成功', 'data': {'url_list': url_list}})
+            name_list = []
+            for conn in FileConn.objects.filter(obj_id=obj_id).filter(obj_type=obj_type):
+                f = File.objects.get(file_id=conn.file_id)
+                url_list.append(f.url)
+                name_list.append(f.name)
+            return JsonResponse({'status': 0, 'info': '查询成功', 'data': {'url_list': url_list, 'name_list': name_list}})
     except Exception as e:
         print(e)
         return JsonResponse({'status': -1, 'info': '操作错误，查询失败'})
