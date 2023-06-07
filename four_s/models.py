@@ -13,7 +13,7 @@ class UserInfo(models.Model):
     card_id = models.CharField(max_length=20, null=True)
     phone = models.CharField(max_length=20, null=True)
     email = models.CharField(max_length=50, null=True)
-    avatar = models.CharField(max_length=200, null=True)
+    avatar = models.TextField(null=True)
     point = models.IntegerField()
 
     def to_dict(self):
@@ -76,7 +76,7 @@ class Block(models.Model):
     block_id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=200)
     time = models.DateTimeField()
-    avatar = models.CharField(max_length=200)
+    avatar = models.TextField()
     info = models.CharField(max_length=200)
     # <0: 无需认证，0:需要路人认证，1:成员认证，2:助理认证，3:管理认证，>=4：超管认证
     approve_permission = models.IntegerField()
@@ -210,3 +210,9 @@ class EmailPro(models.Model):
     card_id = models.CharField(max_length=20, null=True)
     phone = models.CharField(max_length=20, null=True)
     avatar = models.CharField(max_length=200, null=True)
+
+
+class File(models.Model):
+    obj_id = models.IntegerField()
+    obj_type = models.IntegerField()
+    obj_url = models.TextField()

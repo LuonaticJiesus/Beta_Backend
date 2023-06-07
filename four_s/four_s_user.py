@@ -51,7 +51,7 @@ def check_email(email: str):
 
 
 def check_avatar(avatar: str):
-    return 0 < len(avatar) < 200
+    return 0 < len(avatar)
 
 
 def random_str(randomlength=8):

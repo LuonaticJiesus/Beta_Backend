@@ -78,4 +78,6 @@ urlpatterns = [
 
     # file
     path('file/upload/', file_upload, name='file_upload'),
+    path('file/connect/', file_connect, name='file_connect'),
+    path('file/list/', file_list, name='file_list'),
 ]
