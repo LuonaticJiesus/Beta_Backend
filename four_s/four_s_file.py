@@ -51,7 +51,7 @@ def file_upload(request):
         new_file = File(url=file_url, name=file_name)
         new_file.save()
         return JsonResponse({'status': 0, 'info': '上传成功',
-                             'data': {'url': file_url}})
+                             'data': {'url': file_url, 'file_id': new_file.file_id}})
     except Exception as e:
         print(e)
         return JsonResponse({'status': -1, 'info': '操作错误，上传失败'})
