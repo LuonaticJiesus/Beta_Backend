@@ -5,7 +5,8 @@ from django.db import transaction
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
-from four_s.models import Block, Permission, Post, UserInfo, PostLike, Comment, PostChosen, PostFavor, Message, File
+from four_s.models import Block, Permission, Post, UserInfo, PostLike, Comment, PostChosen, PostFavor, Message, File, \
+    FileConn
 from BackEnd import global_config
 
 
@@ -362,7 +363,7 @@ def post_delete(request):
                 message1.save()
                 message2.save()
             # file
-            File.objects.filter(obj_type=1).filter(obj_id=post_id).delete()
+            FileConn.objects.filter(obj_type=1).filter(obj_id=post_id).delete()
             return JsonResponse({'status': 0, 'info': '已删除'})
     except Exception as e:
         print(e)
