@@ -41,10 +41,15 @@ def file_upload(request):
             return JsonResponse({'status': -1, 'info': '缺少参数'})
         if file_name is not None:
             file_name = str(file_name)
+        if len(file) > 10 * 1024 * 1024:
+            return JsonResponse({'status': -1, 'info': '文件过大'})
         suffix = os.path.splitext(file.name)[-1]
         file_key = rand_str() + suffix
-        response = tencent_cos_client.upload_file_from_buffer(
-            Bucket=tencent_cos_bucket, Key=file_key, Body=file)
+        try:
+            response = tencent_cos_client.upload_file_from_buffer(
+                Bucket=tencent_cos_bucket, Key=file_key, Body=file)
+        except Exception as e:
+            return JsonResponse({'status': -1, 'info': '上传超时'})
         if response is None:
             return JsonResponse({'status': -1, 'info': '上传失败'})
         file_url = 'https://{}.cos.{}.myqcloud.com/{}'.format(tencent_cos_bucket, tencent_cos_region, file_key)
