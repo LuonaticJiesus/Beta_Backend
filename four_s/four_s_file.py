@@ -45,10 +45,12 @@ def file_upload(request):
             return JsonResponse({'status': -1, 'info': '文件过大'})
         suffix = os.path.splitext(file.name)[-1]
         file_key = rand_str() + suffix
+        file_data = file.file.read()
         try:
             response = tencent_cos_client.upload_file_from_buffer(
-                Bucket=tencent_cos_bucket, Key=file_key, Body=file)
+                Bucket=tencent_cos_bucket, Key=file_key, Body=file.file)
         except Exception as e:
+            print(e)
             return JsonResponse({'status': -1, 'info': '上传超时'})
         if response is None:
             return JsonResponse({'status': -1, 'info': '上传失败'})
