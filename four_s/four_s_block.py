@@ -9,7 +9,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
 from four_s.models import Block, Permission, Post, Comment, CommentLike, PostFavor, PostChosen, PostLike, Notice, \
-    Contribution, Message, File, FileConn
+    Contribution, Message, File, FileConn, PointBlock
 
 
 def check_name(name: str):
@@ -356,6 +356,7 @@ def block_delete(request):
             Notice.objects.filter(block_id=block_id).delete()
             Contribution.objects.filter(block_id=block_id).delete()
             FileConn.objects.filter(obj_type=3).filter(obj_id=block_id).delete()
+            PointBlock.objects.filter(block_id=block_id).delete()
             Block.objects.filter(block_id=block_id).delete()
             return JsonResponse({'status': 0, 'info': '已删除'})
     except Exception as e:

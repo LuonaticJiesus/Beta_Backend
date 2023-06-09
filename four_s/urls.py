@@ -4,6 +4,7 @@ from django.urls import path
 from four_s.four_s_block import *
 from four_s.four_s_comment import *
 from four_s.four_s_file import *
+from four_s.four_s_stat import *
 from four_s.four_s_notice import *
 from four_s.four_s_permission import *
 from four_s.four_s_post import *
@@ -80,4 +81,10 @@ urlpatterns = [
     path('file/upload/', file_upload, name='file_upload'),
     path('file/connect/', file_connect, name='file_connect'),
     path('file/list/', file_list, name='file_list'),
+
+    # statistics
+    path('statistic/post-time', stat_post_time, name='stat_post_time'),
+    path('statistic/post-module', stat_post_block, name='stat_post_block'),
+    path('statistic/pointsource-module', stat_point_block, name='stat_point_block'),
+    path('statistic/point-time', stat_point_time, name='stat_point_time'),
 ]

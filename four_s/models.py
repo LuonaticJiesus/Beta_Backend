@@ -232,3 +232,18 @@ class FileConn(models.Model):
     file_id = models.IntegerField()
     obj_id = models.IntegerField()
     obj_type = models.IntegerField()
+
+
+class Stat(models.Model):
+    log_id = models.AutoField(primary_key=True)
+    user_id = models.IntegerField()
+    point = models.IntegerField()
+    block_name = models.IntegerField()
+    time = models.TimeField()
+
+
+class PointBlock(models.Model):
+    block_id = models.IntegerField()
+    user_id = models.IntegerField()
+    point_add = models.IntegerField()
+    point_sub = models.IntegerField()
