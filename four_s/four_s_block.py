@@ -133,7 +133,7 @@ def block_search_all(request):
             return JsonResponse({'status': -1, 'info': '参数不合法'})
         # db
         with transaction.atomic():
-            block_query_set = Block.objects.filter(Q(name__icontains=keyword) | Q(info__icontains=keyword))
+            block_query_set = Block.objects.filter(name__icontains=keyword)
             blocks = []
             for block in block_query_set:
                 b_dict = block.to_dict()
