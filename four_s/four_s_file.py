@@ -17,7 +17,7 @@ tencent_cos_region = global_config['tencent_cos']['region']
 tencent_cos_bucket = global_config['tencent_cos']['bucket']
 tencent_cos_config = CosConfig(Region=tencent_cos_region, SecretId=tencent_cos_secret_id,
                                SecretKey=tencent_cos_secret_key, Timeout=5)
-tencent_cos_client = CosS3Client(tencent_cos_config, retry=0)
+
 
 chars = 'abcdefghijklmnopqrstuvwxyz0123456789'
 
@@ -50,6 +50,7 @@ def file_upload(request):
         #     file_data = file.file.read()
         #     f.write(file_data)
         try:
+            tencent_cos_client = CosS3Client(tencent_cos_config, retry=0)
             response = tencent_cos_client.upload_file_from_buffer(
                 Bucket=tencent_cos_bucket, Key=file_key, Body=file.file)
             # response = tencent_cos_client.put_object_from_local_file(
