@@ -345,6 +345,7 @@
 | user_my_info    |                                                              | 查询个人所有信息                 |                                                              | `user/myInfo/`    | POST     |
 | user_modify     | card_id <br />phone <br />email <br />avatar                 | 根据提供的非空参数更新用户信息   | 学工卡格式错误<br />手机格式错误<br />邮箱格式错误<br />头像格式错误 | `user/modify/`    | POST     |
 | user_change_pwd | old_password                                                 |                                  | 用户不存在 旧密码错误                                        | `user/changePwd/` | POST     |
+| user_public_key |                                                              | 获取加密公钥                     |                                                              | `user/publicKey/` | GET      |
 
 
 
@@ -356,3 +357,11 @@
 | file_connect | type<br/>id<br/>url_list[] | 将附件关联到模块、帖子或通知         | obj_type=1但是帖子不存在<br />obj_type=2但是通知不存在<br />obj_type=3但是模块不存在<br /> | `file/connect/` | POST     |
 | file_list    | obj_type<br/>obj_id        | 获取模块、帖子或通知所关联的附件列表 |                                                              | `file/list/`    | GET      |
 
+
+
+### `four_s_stat.py`
+
+| 函数名          | 传入参数 | 功能                                                         | 接口路由                | 请求类型 |
+| --------------- | -------- | ------------------------------------------------------------ | ----------------------- | -------- |
+| stat_post_time  | state    | state=1查询近一年的发帖数，按月计<br />state=2查询近七天的发帖数，按天计 | `statistic/post-time`   | GET      |
+| stat_post_block |          | 查询发布帖子在模块中的分布情况                               | `statistic/post-module` | GET      |
