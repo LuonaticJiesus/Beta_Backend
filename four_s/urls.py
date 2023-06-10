@@ -23,6 +23,7 @@ urlpatterns = [
     path('user/modify/', user_modify, name='user_modify'),
     path('user/changePwd/', user_change_pwd, name='user_change_pwd'),
     path('user/active/', active_email, name='user_check_email'),
+    path('user/publicKey/', user_public_key, name='user_public_key'),
 
     # block
     path('block/queryAll/', block_query_all, name='block_query_all'),
@@ -87,4 +88,5 @@ urlpatterns = [
     path('statistic/post-module', stat_post_block, name='stat_post_block'),
     # path('statistic/pointsource-module', stat_point_block, name='stat_point_block'),
     # path('statistic/point-time', stat_point_time, name='stat_point_time'),
+
 ]

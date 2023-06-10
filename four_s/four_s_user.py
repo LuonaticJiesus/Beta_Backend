@@ -13,7 +13,7 @@ from django.views.decorators.csrf import csrf_exempt
 from BackEnd import global_config
 from BackEnd.settings import EMAIL_HOST_USER, SERVER_IP, SERVER_PORT, TIME_ZONE
 from four_s.models import UserInfo, EmailPro, UserLogin, Message
-from utils.auth_util import create_token
+from utils.auth_util import create_token, decrypt_pass
 
 
 # 长度 5-20，字母数字下划线
@@ -81,7 +81,7 @@ def user_signup(request):
         name = str(name).strip('\t').strip(' ')
         if not check_name(name):
             return JsonResponse({'status': -1, 'info': '用户名格式错误'})
-        password = str(password)
+        password = decrypt_pass(str(password))
         if not check_pwd(password):
             return JsonResponse({'status': -1, 'info': '密码格式错误'})
         if card_id is not None:
@@ -170,7 +170,7 @@ def user_login(request):
         if name is None or password is None:
             return JsonResponse({'status': -1, 'info': '用户名或密码为空'})
         name = str(name).strip(' ').strip('\t')
-        password = str(password).strip(' ').strip('\t')
+        password = decrypt_pass(str(password))
         # db
         with transaction.atomic():
             user_query_set = UserInfo.objects.filter(name=name)
@@ -324,3 +324,11 @@ def user_change_pwd(request):
     except Exception as e:
         print(e)
         return JsonResponse({'status': -1, 'info': '操作错误，注册失败'})
+
+
+@csrf_exempt
+def user_public_key(request):
+    if request.method != 'GET':
+        return JsonResponse({'status': -1, 'info': '请求方式错误'})
+    return JsonResponse({'status': 0, 'info': '查询成功', 'data': {'public_key': global_config['rsa']['public_key']}})
+

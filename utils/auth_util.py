@@ -1,5 +1,10 @@
+import base64
 import re
 import time
+
+from Crypto import Random
+from Crypto.Cipher import PKCS1_v1_5
+from Crypto.PublicKey import RSA
 from django.core import signing
 import hashlib
 
@@ -89,6 +94,8 @@ class AuthorizeMiddleware(MiddlewareMixin):
                 return
             if re.match(r'/four_s/user/active/', request.path):
                 return
+            if re.match(r'/four_s/user/publicKey/', request.path):
+                return
             user_id = str(request.META.get('HTTP_USERID'))
             token = request.META.get('HTTP_TOKEN')
             if user_id is None or token is None:
@@ -99,3 +106,13 @@ class AuthorizeMiddleware(MiddlewareMixin):
         except Exception as e:
             print(e)
             return JsonResponse({'status': -1, 'info': '服务器错误，请刷新页面，重新登录'})
+
+
+# rsa
+def decrypt_pass(password):
+    random_generator = Random.new().read
+    RSA.generate(1024, random_generator)
+    rsakey = RSA.importKey(bytes(global_config['rsa']['private_key'].encode()))
+    cipher = PKCS1_v1_5.new(rsakey)
+    return str(cipher.decrypt(base64.b64decode(password), random_generator).decode())
+
