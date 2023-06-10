@@ -257,7 +257,8 @@ def user_modify(request):
         data = json.loads(request.body)
         card_id = data.get('card_id')
         phone = data.get('phone')
-        email = data.get('email')
+        # email = data.get('email')
+        email = None
         avatar = data.get('avatar')
         # check params
         if card_id is not None:
