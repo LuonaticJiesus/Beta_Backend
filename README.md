@@ -15,16 +15,16 @@
 
 主键：user_id
 
-| 属性名   | 类型         | 限制                 | 说明         |
-| -------- | ------------ | -------------------- | ------------ |
-| user_id  | AutoField    | 主键                 |              |
-| name     | CharField    | max_length=200       |              |
-| password | CharField    | max_length=200       | 已加密的密码 |
-| card_id  | CharField    | max_length=200       | 学号         |
-| phone    | CharField    | max_length=20，可空  |              |
-| email    | CharField    | max_length=50，可空  | 要求北航邮箱 |
-| avatar   | CharField    | max_length=200，可空 | 头像url      |
-| point    | IntegerField |                      |              |
+| 属性名   | 类型         | 限制                | 说明         |
+| -------- | ------------ | ------------------- | ------------ |
+| user_id  | AutoField    | 主键                |              |
+| name     | CharField    | max_length=200      |              |
+| password | CharField    | max_length=200      | 已加密的密码 |
+| card_id  | CharField    | max_length=200      | 学号         |
+| phone    | CharField    | max_length=20，可空 |              |
+| email    | CharField    | max_length=50，可空 | 要求北航邮箱 |
+| avatar   | TextField    |                     | 头像url      |
+| point    | IntegerField |                     |              |
 
 
 
@@ -40,7 +40,7 @@
 | password  | CharField     | max_length=50                                                | 已加密的密码       |
 | card_id   | CharField     | max_length=200                                               | 学号               |
 | phone     | CharField     | max_length=20，可空                                          |                    |
-| avatar    | CharField     | max_length=200，可空                                         | 头像url            |
+| avatar    | TextField     |                                                              | 头像url            |
 
 
 
@@ -109,6 +109,8 @@
 | block_id           | AutoField     | 主键              |                                                              |
 | name               | CharField     | max_length=200    |                                                              |
 | time               | DateTimeField | auto_now_add=True | 模块建立的时间                                               |
+| avatar             | TextField     |                   | 模块头像                                                     |
+| info               | CharField     | max_length=200    |                                                              |
 | approve_permission | IntegerField  |                   | 访问block的权限设置<br /><0: 无需认证，0:需要路人认证，1:成员认证，2:助理认证，3:管理认证，>=4：超管认证 |
 
 
@@ -244,6 +246,14 @@
 
 
 
+### File
+
+| 属性名   | 类型         |
+| -------- | ------------ |
+| obj_id   | IntegerField |
+| obj_type | IntegerField |
+| obj_url  | TextField    |
+
 ## 2 功能函数
 
 ### `four_s_block.py`
@@ -335,3 +345,14 @@
 | user_my_info    |                                                              | 查询个人所有信息                 |                                                              | `user/myInfo/`    | POST     |
 | user_modify     | card_id <br />phone <br />email <br />avatar                 | 根据提供的非空参数更新用户信息   | 学工卡格式错误<br />手机格式错误<br />邮箱格式错误<br />头像格式错误 | `user/modify/`    | POST     |
 | user_change_pwd | old_password                                                 |                                  | 用户不存在 旧密码错误                                        | `user/changePwd/` | POST     |
+
+
+
+### `four_s_file.py`
+
+| 函数名       | 传入参数                   | 功能                                 | 异常处理                                                     | 接口路由        | 请求类型 |
+| ------------ | -------------------------- | ------------------------------------ | ------------------------------------------------------------ | --------------- | -------- |
+| file_upload  | FILES.get('file')          | 上传文件                             | 文件大小不符                                                 | `file/upload/`  | POST     |
+| file_connect | type<br/>id<br/>url_list[] | 将附件关联到模块、帖子或通知         | obj_type=1但是帖子不存在<br />obj_type=2但是通知不存在<br />obj_type=3但是模块不存在<br /> | `file/connect/` | POST     |
+| file_list    | obj_type<br/>obj_id        | 获取模块、帖子或通知所关联的附件列表 |                                                              | `file/list/`    | GET      |
+
