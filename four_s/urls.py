@@ -85,6 +85,6 @@ urlpatterns = [
     # statistics
     path('statistic/post-time', stat_post_time, name='stat_post_time'),
     path('statistic/post-module', stat_post_block, name='stat_post_block'),
-    path('statistic/pointsource-module', stat_point_block, name='stat_point_block'),
-    path('statistic/point-time', stat_point_time, name='stat_point_time'),
+    # path('statistic/pointsource-module', stat_point_block, name='stat_point_block'),
+    # path('statistic/point-time', stat_point_time, name='stat_point_time'),
 ]

@@ -20,7 +20,7 @@ def get_stat_dict(state: int):
     else:
         for i in range(0, 7):
             step_time = zero_time - relativedelta(days=i)
-            step_time_str = step_time.strftime('%Y-%m')
+            step_time_str = step_time.strftime('%Y-%m-%d')
             ret[step_time_str] = 0
     return ret
 
@@ -86,49 +86,49 @@ def stat_post_block(request):
         print(e)
         return JsonResponse({'status': -1, 'info': '操作错误，查询失败'})
 
-
-@csrf_exempt
-def stat_point_block(request):
-    if request.method != 'GET':
-        return JsonResponse({'status': -1, 'info': '请求方式错误'})
-    try:
-        user_id = int(request.META.get('HTTP_USERID'))
-        # db
-        with transaction.atomic():
-            point_query_set = PointBlock.objects.filter(user_id=user_id)
-            ret = []
-
-            for p in point_query_set:
-                block_name = Block.objects.get(block_id=p.block_id).name
-                ret.append({'name': block_name, 'value_plus': p.point_add, 'value_minus': p.point_sub})
-            return JsonResponse({'status': 0, 'info': '查询成功', 'data': ret})
-    except Exception as e:
-        print(e)
-        return JsonResponse({'status': -1, 'info': '操作错误，查询失败'})
-
-
-@csrf_exempt
-def stat_point_time(request):
-    if request.method != 'GET':
-        return JsonResponse({'status': -1, 'info': '请求方式错误'})
-    try:
-        user_id = int(request.META.get('HTTP_USERID'))
-        state = request.GET.get('state')
-        # check param
-        if state is None:
-            return JsonResponse({'status': -1, 'info': '缺少参数'})
-        state = int(state)
-        if state not in [1, 2]:
-            return JsonResponse({'status': -1, 'info': '参数错误'})
-        with transaction.atomic():
-            stat_query_set = Stat.objects.filter(user_id=user_id)
-            stat_dict = get_stat_dict(state)
-            time_format = '%Y-%m' if state == 1 else '%Y-%m-%d'
-            for s in stat_query_set:
-                s_time_str = s.time.strftime(time_format)
-                if s_time_str in stat_dict.keys():
-                    stat_dict[s_time_str] += 1
-
-    except Exception as e:
-        print(e)
-        return JsonResponse({'status': -1, 'info': '操作错误，查询失败'})
+#
+# @csrf_exempt
+# def stat_point_block(request):
+#     if request.method != 'GET':
+#         return JsonResponse({'status': -1, 'info': '请求方式错误'})
+#     try:
+#         user_id = int(request.META.get('HTTP_USERID'))
+#         # db
+#         with transaction.atomic():
+#             point_query_set = PointBlock.objects.filter(user_id=user_id)
+#             ret = []
+#
+#             for p in point_query_set:
+#                 block_name = Block.objects.get(block_id=p.block_id).name
+#                 ret.append({'name': block_name, 'value_plus': p.point_add, 'value_minus': p.point_sub})
+#             return JsonResponse({'status': 0, 'info': '查询成功', 'data': ret})
+#     except Exception as e:
+#         print(e)
+#         return JsonResponse({'status': -1, 'info': '操作错误，查询失败'})
+#
+#
+# @csrf_exempt
+# def stat_point_time(request):
+#     if request.method != 'GET':
+#         return JsonResponse({'status': -1, 'info': '请求方式错误'})
+#     try:
+#         user_id = int(request.META.get('HTTP_USERID'))
+#         state = request.GET.get('state')
+#         # check param
+#         if state is None:
+#             return JsonResponse({'status': -1, 'info': '缺少参数'})
+#         state = int(state)
+#         if state not in [1, 2]:
+#             return JsonResponse({'status': -1, 'info': '参数错误'})
+#         with transaction.atomic():
+#             stat_query_set = Stat.objects.filter(user_id=user_id)
+#             stat_dict = get_stat_dict(state)
+#             time_format = '%Y-%m' if state == 1 else '%Y-%m-%d'
+#             for s in stat_query_set:
+#                 s_time_str = s.time.strftime(time_format)
+#                 if s_time_str in stat_dict.keys():
+#                     stat_dict[s_time_str] += 1
+#
+#     except Exception as e:
+#         print(e)
+#         return JsonResponse({'status': -1, 'info': '操作错误，查询失败'})
