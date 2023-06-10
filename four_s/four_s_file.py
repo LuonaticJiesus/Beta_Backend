@@ -93,9 +93,9 @@ def file_connect(request):
             urls.append(str(url))
         # db
         with transaction.atomic():
-            if (obj_id == 1 and not Post.objects.filter(post_id=obj_id).exists()) \
-                    or (obj_id == 2 and not Notice.objects.filter(notice_id=obj_id).exists()) \
-                    or (obj_id == 3 and not Block.objects.filter(block_id=obj_id).exists()):
+            if (obj_type == 1 and not Post.objects.filter(post_id=obj_id).exists()) \
+                    or (obj_type == 2 and not Notice.objects.filter(notice_id=obj_id).exists()) \
+                    or (obj_type == 3 and not Block.objects.filter(block_id=obj_id).exists()):
                 return JsonResponse({'status': -1, 'info': '类型错误'})
             for url in urls:
                 file_query_set = File.objects.filter(url=url)
