@@ -257,7 +257,7 @@ def user_modify(request):
         data = json.loads(request.body)
         card_id = data.get('card_id')
         phone = data.get('phone')
-        email = data.get('email')
+        # email = data.get('email')
         avatar = data.get('avatar')
         # check params
         if card_id is not None:
@@ -268,10 +268,10 @@ def user_modify(request):
             phone = str(phone).strip('\t').strip(' ')
             if not check_phone(phone):
                 return JsonResponse({'status': -1, 'info': '手机格式错误'})
-        if email is not None:
-            email = str(email).strip('\t').strip(' ')
-            if not check_email(email):
-                return JsonResponse({'status': -1, 'info': '邮箱格式错误'})
+        # if email is not None:
+        #     email = str(email).strip('\t').strip(' ')
+        #     if not check_email(email):
+        #         return JsonResponse({'status': -1, 'info': '邮箱格式错误'})
         if avatar is not None:
             avatar = str(avatar).strip('\t').strip(' ')
             if not check_avatar(avatar):
@@ -283,8 +283,8 @@ def user_modify(request):
                 user.update(card_id=card_id)
             if phone is not None:
                 user.update(phone=phone)
-            if email is not None:
-                user.update(email=email)
+            # if email is not None:
+            #     user.update(email=email)
             if avatar is not None:
                 user.update(avatar=avatar)
             return JsonResponse({'status': 0, 'info': '已修改'})
