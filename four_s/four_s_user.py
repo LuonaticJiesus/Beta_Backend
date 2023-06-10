@@ -305,8 +305,8 @@ def user_change_pwd(request):
         # check params
         if password is None or old_password is None:
             return JsonResponse({'status': -1, 'info': '缺少参数'})
-        password = str(password)
-        old_password = str(old_password)
+        password = decrypt_pass(str(password))
+        old_password = decrypt_pass(str(old_password))
         if not check_pwd(password):
             return JsonResponse({'status': -1, 'info': '新密码格式错误'})
         # db
